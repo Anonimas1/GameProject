@@ -1,7 +1,5 @@
-﻿ using UnityEngine;
-#if ENABLE_INPUT_SYSTEM 
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
-#endif
 
 /* Note: animations are called via the controller for both the character and capsule using animator null checks
  */
@@ -9,9 +7,6 @@ using UnityEngine.InputSystem;
 namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
-#if ENABLE_INPUT_SYSTEM 
-    [RequireComponent(typeof(PlayerInput))]
-#endif
     public class ThirdPersonController : MonoBehaviour
     {
         [Header("Player")]
@@ -82,7 +77,7 @@ namespace StarterAssets
         // player
         private float _speed;
         private float _animationBlend;
-        private float _targetRotation = 0.0f;
+        private float _targetRotation;
         private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
@@ -97,10 +92,7 @@ namespace StarterAssets
         private int _animIDJump;
         private int _animIDFreeFall;
         private int _animIDMotionSpeed;
-
-#if ENABLE_INPUT_SYSTEM 
-        private PlayerInput _playerInput;
-#endif
+        
         private Animator _animator;
         private CharacterController _controller;
         private StarterAssetsInputs _input;
@@ -110,18 +102,6 @@ namespace StarterAssets
 
         private bool _hasAnimator;
 
-        private bool IsCurrentDeviceMouse
-        {
-            get
-            {
-#if ENABLE_INPUT_SYSTEM
-                return _playerInput.currentControlScheme == "KeyboardMouse";
-#else
-				return false;
-#endif
-            }
-        }
-        
         private void Awake()
         {
             // get a reference to our main camera
@@ -138,11 +118,6 @@ namespace StarterAssets
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
-#if ENABLE_INPUT_SYSTEM 
-            _playerInput = GetComponent<PlayerInput>();
-#else
-			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
-#endif
 
             AssignAnimationIDs();
 
@@ -153,8 +128,6 @@ namespace StarterAssets
 
         private void Update()
         {
-            _hasAnimator = TryGetComponent(out _animator);
-
             JumpAndGravity();
             GroundedCheck();
             Move();
@@ -194,11 +167,8 @@ namespace StarterAssets
             // if there is an input and camera position is not fixed
             if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
             {
-                //Don't multiply mouse input by Time.deltaTime;
-                float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
-
-                _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
-                _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
+                _cinemachineTargetYaw += _input.look.x;
+                _cinemachineTargetPitch += _input.look.y;
             }
 
             // clamp our rotations so our values are limited 360 degrees

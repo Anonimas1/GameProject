@@ -1,80 +1,83 @@
 using UnityEngine;
-#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
-#endif
 
 namespace StarterAssets
 {
-	public class StarterAssetsInputs : MonoBehaviour
-	{
-		[Header("Character Input Values")]
-		public Vector2 move;
-		public Vector2 look;
-		public bool jump;
-		public bool sprint;
+    public class StarterAssetsInputs : MonoBehaviour
+    {
+        public InputActionAsset inputActionAsset;
 
-		[Header("Movement Settings")]
-		public bool analogMovement;
+        [Header("Character Input Values")] 
+        public Vector2 move;
+        public Vector2 look;
+        public bool jump;
+        public bool sprint;
 
-		[Header("Mouse Cursor Settings")]
-		public bool cursorLocked = true;
-		public bool cursorInputForLook = true;
+        [Header("Movement Settings")] public bool analogMovement;
 
-#if ENABLE_INPUT_SYSTEM
-		public void OnMove(InputValue value)
-		{
-			MoveInput(value.Get<Vector2>());
-		}
+        [Header("Mouse Cursor Settings")] public bool cursorLocked = true;
+        public bool cursorInputForLook = true;
 
-		public void OnLook(InputValue value)
-		{
-			if(cursorInputForLook)
-			{
-				LookInput(value.Get<Vector2>());
-			}
-		}
+        private InputAction _moveAction;
+        private InputAction _lookAction;
 
-		public void OnJump(InputValue value)
-		{
-			JumpInput(value.isPressed);
-		}
+        public void Awake()
+        {
+            inputActionAsset.Enable();
+            var actionMap = inputActionAsset.FindActionMap("Player");
 
-		public void OnSprint(InputValue value)
-		{
-			SprintInput(value.isPressed);
-		}
-#endif
+            _moveAction = actionMap.FindAction("Move");
+            _lookAction = actionMap.FindAction("Look");
+            actionMap.FindAction("Jump").performed += OnJump;
+            actionMap.FindAction("Sprint").performed += OnSprint;
+        }
 
+        private void Update()
+        {
+            if (cursorInputForLook)
+            {
+                LookInput(_lookAction.ReadValue<Vector2>());
+            }
+            MoveInput(_moveAction.ReadValue<Vector2>());
+        }
+        
+        private void OnJump(InputAction.CallbackContext ctx)
+        {
+            JumpInput();
+        }
+        private void OnSprint(InputAction.CallbackContext ctx)
+        {
+            SprintInput();
+        }
 
-		public void MoveInput(Vector2 newMoveDirection)
-		{
-			move = newMoveDirection;
-		} 
+        public void MoveInput(Vector2 newMoveDirection)
+        {
+            move = newMoveDirection;
+        }
 
-		public void LookInput(Vector2 newLookDirection)
-		{
-			look = newLookDirection;
-		}
+        public void LookInput(Vector2 newLookDirection)
+        {
+            look = newLookDirection;
+        }
 
-		public void JumpInput(bool newJumpState)
-		{
-			jump = newJumpState;
-		}
+        public void JumpInput()
+        {
+            jump = true;
+        }
 
-		public void SprintInput(bool newSprintState)
-		{
-			sprint = newSprintState;
-		}
+        public void SprintInput()
+        {
+            sprint = !sprint;
+        }
 
-		private void OnApplicationFocus(bool hasFocus)
-		{
-			SetCursorState(cursorLocked);
-		}
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            SetCursorState(cursorLocked);
+        }
 
-		private void SetCursorState(bool newState)
-		{
-			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
-		}
-	}
-	
+        private static void SetCursorState(bool newState)
+        {
+            Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
+        }
+    }
 }
