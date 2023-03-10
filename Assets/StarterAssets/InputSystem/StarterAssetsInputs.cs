@@ -1,29 +1,31 @@
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace StarterAssets
 {
     public class StarterAssetsInputs : MonoBehaviour
     {
         public InputActionAsset inputActionAsset;
+        
+        [Header("Character Input Values")]
+        public Vector2 Move;
+        [FormerlySerializedAs("MousePosition")]
+        public Vector2 MousePositionOnScreen;
+        public bool Jump;
+        public bool Sprint;
 
-        [Header("Character Input Values")] 
-        public Vector2 move;
-        public Vector2 look;
-        public bool jump;
-        public bool sprint;
-
-        [Header("Movement Settings")] public bool analogMovement;
-
-        [Header("Mouse Cursor Settings")] public bool cursorLocked = true;
-        public bool cursorInputForLook = true;
+        [Header("Movement Settings")]
+        public bool analogMovement;
 
         [Header("Firing settings")]
-        public bool IsFiring;
+        public bool Fire;
+
+        [Header("Calculated values")]
+        public Vector3 MousePositionInWorldSpace;
 
         private InputAction _moveAction;
-        private InputAction _lookAction;
+        private InputAction _mouseInputAction;
 
         public void Awake()
         {
@@ -31,7 +33,7 @@ namespace StarterAssets
             var actionMap = inputActionAsset.FindActionMap("Player");
 
             _moveAction = actionMap.FindAction("Move");
-            _lookAction = actionMap.FindAction("Look");
+            _mouseInputAction = actionMap.FindAction("Look");
             actionMap.FindAction("Jump").performed += OnJump;
             actionMap.FindAction("Sprint").performed += OnSprint;
             actionMap.FindAction("Fire").performed += OnFire;
@@ -39,17 +41,26 @@ namespace StarterAssets
 
         private void Update()
         {
-            if (cursorInputForLook)
-            {
-                LookInput(_lookAction.ReadValue<Vector2>());
-            }
+            LookInput(_mouseInputAction.ReadValue<Vector2>());
             MoveInput(_moveAction.ReadValue<Vector2>());
+            
+            CalculateMousePositionInWorldSpace();
         }
-        
+
+        private void CalculateMousePositionInWorldSpace()
+        {
+            var ray = Camera.main.ScreenPointToRay(MousePositionOnScreen);
+            if (Physics.Raycast(ray, out var hintData, 1000))
+            {
+                MousePositionInWorldSpace = hintData.point;
+            }
+        }
+
         private void OnJump(InputAction.CallbackContext ctx)
         {
             JumpInput();
         }
+
         private void OnSprint(InputAction.CallbackContext ctx)
         {
             SprintInput();
@@ -62,37 +73,27 @@ namespace StarterAssets
 
         public void FireInput(bool input)
         {
-            IsFiring = input;
+            Fire = input;
         }
-        
+
         public void MoveInput(Vector2 newMoveDirection)
         {
-            move = newMoveDirection;
+            Move = newMoveDirection;
         }
 
         public void LookInput(Vector2 newLookDirection)
         {
-            look = newLookDirection;
+            MousePositionOnScreen = newLookDirection;
         }
 
         public void JumpInput()
         {
-            jump = true;
+            Jump = true;
         }
 
         public void SprintInput()
         {
-            sprint = !sprint;
-        }
-
-        private void OnApplicationFocus(bool hasFocus)
-        {
-            SetCursorState(cursorLocked);
-        }
-
-        private static void SetCursorState(bool newState)
-        {
-            Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
+            Sprint = !Sprint;
         }
     }
 }

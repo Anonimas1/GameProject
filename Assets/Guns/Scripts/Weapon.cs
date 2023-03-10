@@ -24,7 +24,7 @@ public class Weapon : MonoBehaviour
     
     void Update()
     {
-        if (_input.IsFiring && _timePassedAfterShot >= DelayBetweenShots)
+        if (_input.Fire && _timePassedAfterShot >= DelayBetweenShots)
         {
             Shoot();
             _timePassedAfterShot = 0f;
