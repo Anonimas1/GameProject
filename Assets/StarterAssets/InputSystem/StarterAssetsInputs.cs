@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 namespace StarterAssets
@@ -18,6 +19,9 @@ namespace StarterAssets
         [Header("Mouse Cursor Settings")] public bool cursorLocked = true;
         public bool cursorInputForLook = true;
 
+        [Header("Firing settings")]
+        public bool IsFiring;
+
         private InputAction _moveAction;
         private InputAction _lookAction;
 
@@ -30,6 +34,7 @@ namespace StarterAssets
             _lookAction = actionMap.FindAction("Look");
             actionMap.FindAction("Jump").performed += OnJump;
             actionMap.FindAction("Sprint").performed += OnSprint;
+            actionMap.FindAction("Fire").performed += OnFire;
         }
 
         private void Update()
@@ -50,6 +55,16 @@ namespace StarterAssets
             SprintInput();
         }
 
+        private void OnFire(InputAction.CallbackContext ctx)
+        {
+            FireInput(ctx.ReadValueAsButton());
+        }
+
+        public void FireInput(bool input)
+        {
+            IsFiring = input;
+        }
+        
         public void MoveInput(Vector2 newMoveDirection)
         {
             move = newMoveDirection;
