@@ -31,7 +31,25 @@ public class Weapon : MonoBehaviour
         }
 
         _timePassedAfterShot += Time.deltaTime;
+        
+        
+        
+        var targetRotationVector = GetTargetRotationVector();
+        Debug.Log(targetRotationVector.ToString());
+        var _targetRotation = Mathf.Atan2(targetRotationVector.z, targetRotationVector.y) * Mathf.Rad2Deg;
+        /*float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
+            RotationSmoothTime);*/
+        transform.LookAt(_input.MousePositionInWorldSpace);
+        // rotate to face mouse cursor
+        
+        
     }
+    
+    private Vector3 GetTargetRotationVector()
+    {
+        return (_input.MousePositionInWorldSpace -  transform.position).normalized;
+    }
+
 
     public void Shoot()
     {

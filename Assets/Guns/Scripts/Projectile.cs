@@ -4,15 +4,18 @@ using StarterAssets;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
 {
     public float Speed = 1f;
     public int TimeUntilDestroy = 1; 
     
     private Transform _objectTransform;
+    private Rigidbody _rigidbody;
     void Start()
     {
         _objectTransform = transform;
+        _rigidbody = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
@@ -20,7 +23,7 @@ public class Projectile : MonoBehaviour
     {
         var position = _objectTransform.position;
         position += _objectTransform.forward * (Speed * Time.deltaTime);
-        _objectTransform.position = position;
+        _rigidbody.MovePosition(position);
 
         StartCoroutine(DestroyProjectile());
     }

@@ -52,6 +52,7 @@ namespace StarterAssets
             var ray = Camera.main.ScreenPointToRay(MousePositionOnScreen);
             if (Physics.Raycast(ray, out var hintData, 1000))
             {
+                Debug.DrawLine(ray.origin, hintData.point, Color.blue);
                 MousePositionInWorldSpace = hintData.point;
             }
         }
