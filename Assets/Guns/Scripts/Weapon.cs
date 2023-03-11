@@ -8,13 +8,19 @@ public class Weapon : MonoBehaviour
 {
     public GameObject Projectile;
     public Transform FiringPoint;
-    [FormerlySerializedAs("DelaybetweenShots")]
     [Header("Delay between shorts in seconds")]
     public float DelayBetweenShots = 1;
+    public float TimeToReload = 2;
+    
+    [Header("Magazine settings")]
+    public int BulletsInInventory = 90;
+    public int MagazineCapacity = 30;
+    public int BulletsInMagazine = 30;
 
 
     private StarterAssetsInputs _input;
 
+    [SerializeField]
     private float _timePassedAfterShot;
     // Start is called before the first frame update
     void Start()
@@ -24,35 +30,51 @@ public class Weapon : MonoBehaviour
     
     void Update()
     {
-        if (_input.Fire && _timePassedAfterShot >= DelayBetweenShots)
+        if (_input.Fire && CanShoot())
         {
             Shoot();
             _timePassedAfterShot = 0f;
         }
 
+        if (_input.Reload)
+        {
+            Reload();
+            _input.Reload = false;
+        }
+
         _timePassedAfterShot += Time.deltaTime;
         
-        
-        
-        var targetRotationVector = GetTargetRotationVector();
-        Debug.Log(targetRotationVector.ToString());
-        var _targetRotation = Mathf.Atan2(targetRotationVector.z, targetRotationVector.y) * Mathf.Rad2Deg;
-        /*float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
-            RotationSmoothTime);*/
+        //Hack for now.
         transform.LookAt(_input.MousePositionInWorldSpace);
-        // rotate to face mouse cursor
-        
-        
-    }
-    
-    private Vector3 GetTargetRotationVector()
-    {
-        return (_input.MousePositionInWorldSpace -  transform.position).normalized;
     }
 
+    private bool CanShoot()
+    {
+        return _timePassedAfterShot >= DelayBetweenShots && BulletsInMagazine > 0;
+    }
+
+    public void Reload()
+    {
+        if (BulletsInMagazine == MagazineCapacity || BulletsInInventory == 0)
+        {
+            return;
+        }
+
+        var requiredBullets = MagazineCapacity - BulletsInMagazine;
+        if (BulletsInInventory >= requiredBullets)
+        {
+            BulletsInInventory -= requiredBullets;
+            BulletsInMagazine += requiredBullets;
+            return;
+        }
+
+        BulletsInMagazine += BulletsInInventory;
+        BulletsInInventory = 0;
+    }
 
     public void Shoot()
     {
+        BulletsInMagazine--;
         Instantiate(Projectile, FiringPoint.position, FiringPoint.rotation);
     }
 }
