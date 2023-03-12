@@ -41,6 +41,14 @@ public class Weapon : MonoBehaviour
             Reload();
             _input.Reload = false;
         }
+        
+        var ray = new Ray(FiringPoint.position, _input.MousePositionInWorldSpace - FiringPoint.position);
+        if (Physics.Raycast(ray, out var hintData, 1000))
+        {
+            Debug.DrawLine(ray.origin, hintData.point, Color.red);
+        }
+        
+        
 
         _timePassedAfterShot += Time.deltaTime;
         

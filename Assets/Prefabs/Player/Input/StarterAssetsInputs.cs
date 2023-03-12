@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -30,6 +31,11 @@ namespace StarterAssets
 
         public void Awake()
         {
+
+        }
+
+        public void Start()
+        {
             inputActionAsset.Enable();
             var actionMap = inputActionAsset.FindActionMap("Player");
 
@@ -59,22 +65,22 @@ namespace StarterAssets
             }
         }
         
-        private void OnReload(InputAction.CallbackContext obj)
+        public void OnReload(InputAction.CallbackContext obj)
         {
             ReloadInput(true);
         }
 
-        private void OnJump(InputAction.CallbackContext ctx)
+        public void OnJump(InputAction.CallbackContext ctx)
         {
             JumpInput();
         }
 
-        private void OnSprint(InputAction.CallbackContext ctx)
+        public void OnSprint(InputAction.CallbackContext ctx)
         {
             SprintInput();
         }
 
-        private void OnFire(InputAction.CallbackContext ctx)
+        public void OnFire(InputAction.CallbackContext ctx)
         {
             FireInput(ctx.ReadValueAsButton());
         }
