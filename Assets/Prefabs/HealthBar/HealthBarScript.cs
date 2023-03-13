@@ -15,7 +15,7 @@ public class HealthBarScript : MonoBehaviour
     [Description("Health bar slider position update rate in seconds")]
     public float positionUpdateRate = 0.1f;
 
-    private Transform mainCameraTransform;
+    private Transform _mainCameraTransform;
     void Awake()
     {
         damagable ??= gameObject.GetComponentInParent<Damagable>();
@@ -24,7 +24,8 @@ public class HealthBarScript : MonoBehaviour
         
         slider.maxValue = damagable.MaxHealth;
         slider.value = damagable.CurrentHealth;
-        mainCameraTransform = GameObject.FindWithTag("MainCamera").transform;
+        gameObject.SetActive(false);
+        _mainCameraTransform = GameObject.FindWithTag("MainCamera").transform;
     }
 
     private void Update()
@@ -34,12 +35,17 @@ public class HealthBarScript : MonoBehaviour
 
     private void OnHealthChanged(object sender, int value)
     {
+        if (!gameObject.activeSelf)
+        {
+            gameObject.SetActive(true);   
+        }
+        
         slider.value = value;
     }
     
     private IEnumerator PointAtCamera()
     {
-        slider.transform.LookAt(mainCameraTransform);
+        slider.transform.LookAt(_mainCameraTransform);
         yield return new WaitForSeconds(positionUpdateRate);
     }
 
