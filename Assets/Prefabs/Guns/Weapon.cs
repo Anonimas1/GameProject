@@ -10,7 +10,6 @@ public class Weapon : MonoBehaviour
     public Transform FiringPoint;
     [Header("Delay between shorts in seconds")]
     public float DelayBetweenShots = 1;
-    public float TimeToReload = 2;
     
     [Header("Magazine settings")]
     public int BulletsInInventory = 90;
@@ -19,8 +18,7 @@ public class Weapon : MonoBehaviour
 
 
     private StarterAssetsInputs _input;
-
-    [SerializeField]
+    
     private float _timePassedAfterShot;
     // Start is called before the first frame update
     void Start()
