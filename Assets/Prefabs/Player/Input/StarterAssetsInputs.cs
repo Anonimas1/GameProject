@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
@@ -16,6 +17,7 @@ namespace StarterAssets
         public bool Jump;
         public bool Sprint;
         public bool Reload;
+        public UnityEvent OnPause;
         
         [Header("Movement Settings")]
         public bool analogMovement;
@@ -28,12 +30,7 @@ namespace StarterAssets
 
         private InputAction _moveAction;
         private InputAction _mouseInputAction;
-
-        public void Awake()
-        {
-
-        }
-
+        
         public void Start()
         {
             inputActionAsset.Enable();
@@ -45,6 +42,7 @@ namespace StarterAssets
             actionMap.FindAction("Sprint").performed += OnSprint;
             actionMap.FindAction("Fire").performed += OnFire;
             actionMap.FindAction("Reload").performed += OnReload;
+            actionMap.FindAction("Pause").performed += (_) => OnPause.Invoke();
         }
 
         private void Update()
@@ -64,7 +62,7 @@ namespace StarterAssets
                 MousePositionInWorldSpace = hintData.point;
             }
         }
-        
+
         public void OnReload(InputAction.CallbackContext obj)
         {
             ReloadInput(true);
