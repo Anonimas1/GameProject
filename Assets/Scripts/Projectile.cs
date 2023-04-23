@@ -37,7 +37,7 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<Damagable>(out var damagable))
+        if (other.TryGetComponent<Damageable>(out var damagable))
         {
             damagable.TakeDamage(DamageCaused);
         }

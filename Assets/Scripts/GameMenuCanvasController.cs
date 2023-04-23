@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace DefaultNamespace
 {
     public class GameMenuCanvasController : MonoBehaviour
     {
+        [SerializeField]
+        private RectTransform mainMenu;
+        
         [SerializeField]
         private RectTransform pauseMenu;
         
@@ -14,7 +17,34 @@ namespace DefaultNamespace
         [SerializeField]
         private RectTransform gameOverMenu;
 
+        public Slider musicVolumeSlider;
+        
+        public Slider effectsVolumeSlider;
+
+        public MixerController mixerController;
+
+        public Damageable damageableToTrack;
+
         private bool isPaused;
+
+        private void Start()
+        {
+            //masterVolumeSlider.SetValueWithoutNotify(mixerController.MasterVolume);
+            musicVolumeSlider.SetValueWithoutNotify(mixerController.MusicVolume);
+            effectsVolumeSlider.SetValueWithoutNotify(mixerController.EffectsVolume);
+
+            if (damageableToTrack != null)
+            {
+                damageableToTrack.DamageableHealthBelowZeroHandler += (_, _) => ShowGameOverScreen();   
+            }
+        }
+
+        private void ShowGameOverScreen()
+        {
+            PauseGame();
+            Show(gameOverMenu);
+        }
+
         private static void Show(Component component)
         {
             component.gameObject.SetActive(true);
@@ -24,18 +54,19 @@ namespace DefaultNamespace
         {
             component.gameObject.SetActive(false);
         }
-
+        
+        
         public void HidePauseMenu()
         {
             Hide(pauseMenu);
             Hide(optionsMenu);
-            Time.timeScale = 1;
-            isPaused = false;
+            UnpauseGame();
         }
 
         public void RestartGame()
         {
             Scenes.RestartScene();
+            UnpauseGame();
         }
 
         public void ExitGame()
@@ -47,16 +78,14 @@ namespace DefaultNamespace
         {
             if (!isPaused)
             {
-                Time.timeScale = 0;
+                PauseGame();
                 Show(pauseMenu);
                 Hide(optionsMenu);
-                isPaused = true;
             }
             else
             {
-                Time.timeScale = 1;
+                UnpauseGame();
                 HidePauseMenu();
-                isPaused = false;
             }
         }
         
@@ -65,6 +94,30 @@ namespace DefaultNamespace
             Show(optionsMenu);
             Hide(pauseMenu);
             Hide(gameOverMenu);
+            Hide(mainMenu);
+        }
+
+        private void PauseGame()
+        {
+            Time.timeScale = 0;
+            isPaused = true;
+        }
+
+        private void UnpauseGame()
+        {
+            Time.timeScale = 1;
+            isPaused = false;
+        }
+
+        public void StartGame()
+        {
+            Scenes.LoadNextScene();
+        }
+
+        public void ShowMainMenu()
+        {
+            Show(mainMenu);
+            Hide(optionsMenu);
         }
     }
 }

@@ -8,8 +8,9 @@ using UnityEngine.UI;
 
 public class HealthBarScript : MonoBehaviour
 {
+    [FormerlySerializedAs("damagable")]
     [Tooltip("Default value is from parent game object")]
-    public Damagable damagable;
+    public Damageable damageable;
     [Tooltip("Default value is from child game object")]
     public Slider slider;
     [Description("Health bar slider position update rate in seconds")]
@@ -18,12 +19,12 @@ public class HealthBarScript : MonoBehaviour
     private Transform _mainCameraTransform;
     void Awake()
     {
-        damagable ??= gameObject.GetComponentInParent<Damagable>();
-        damagable.CurrentHealthChangedEventHandler += OnHealthChanged;
+        damageable ??= gameObject.GetComponentInParent<Damageable>();
+        damageable.CurrentHealthChangedEventHandler += OnHealthChanged;
         slider ??= gameObject.GetComponentInChildren<Slider>();
         
-        slider.maxValue = damagable.MaxHealth;
-        slider.value = damagable.CurrentHealth;
+        slider.maxValue = damageable.MaxHealth;
+        slider.value = damageable.CurrentHealth;
         gameObject.SetActive(false);
         _mainCameraTransform = GameObject.FindWithTag("MainCamera").transform;
     }
@@ -51,6 +52,6 @@ public class HealthBarScript : MonoBehaviour
 
     private void OnDestroy()
     {
-        damagable.CurrentHealthChangedEventHandler -= OnHealthChanged;
+        damageable.CurrentHealthChangedEventHandler -= OnHealthChanged;
     }
 }
