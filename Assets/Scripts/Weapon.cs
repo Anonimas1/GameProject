@@ -53,8 +53,7 @@ public class Weapon : MonoBehaviour
 
         _timePassedAfterShot += Time.deltaTime;
         
-        //Hack for now.
-        transform.LookAt(_input.MousePositionInWorldSpace);
+        //Hack for now
     }
 
     private bool CanShoot()

@@ -17,6 +17,7 @@ namespace StarterAssets
         public bool Jump;
         public bool Sprint;
         public bool Reload;
+        public bool PlaceBarrel;
         public UnityEvent OnPause;
         
         [Header("Movement Settings")]
@@ -43,6 +44,7 @@ namespace StarterAssets
             actionMap.FindAction("Fire").performed += OnFire;
             actionMap.FindAction("Reload").performed += OnReload;
             actionMap.FindAction("Pause").performed += (_) => OnPause.Invoke();
+            actionMap.FindAction("PlaceBarrel").performed += OnBarrelPlace;
         }
 
         private void Update()
@@ -61,6 +63,11 @@ namespace StarterAssets
                 Debug.DrawLine(ray.origin, hintData.point, Color.blue);
                 MousePositionInWorldSpace = hintData.point;
             }
+        }
+
+        public void OnBarrelPlace(InputAction.CallbackContext obj)
+        {
+            PlaceBarrelInput();
         }
 
         public void OnReload(InputAction.CallbackContext obj)
@@ -110,6 +117,11 @@ namespace StarterAssets
         public void SprintInput()
         {
             Sprint = !Sprint;
+        }
+        
+        public void PlaceBarrelInput()
+        {
+            PlaceBarrel = true;
         }
     }
 }

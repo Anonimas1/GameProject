@@ -97,7 +97,6 @@ namespace StarterAssets
             GroundedCheck();
             MoveAndRotate();
             PlayWalkAudio();
-            Debug.Log(footstepAudio.isPlaying);
         }
 
         private void PlayWalkAudio()
@@ -145,15 +144,15 @@ namespace StarterAssets
 
         private void SetAnimationState(float speed)
         {
-            if (speed == 0.0f)
+            if (Math.Abs(speed - 0)  < 0.2f)
             {
                 animator.SetInteger(_animState, 0);
             }
-            else if (Math.Abs(speed - MoveSpeed) < 0.2)
+            else if (Math.Abs(speed - MoveSpeed) < 0.5)
             {
                 animator.SetInteger(_animState, 1);
             }
-            else if (Math.Abs(speed - SprintSpeed) < 0.2)
+            else if (Math.Abs(speed - SprintSpeed) < 0.5)
             {
                 animator.SetInteger(_animState, 2);
             }
