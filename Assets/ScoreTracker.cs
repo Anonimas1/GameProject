@@ -6,8 +6,7 @@ public class ScoreTracker : MonoBehaviour
 {
 	public int Score;
 	public int ScoreToAdd;
-	public int ScoreTarget = 10;
-
+	
 	public GameObject PanelToActivate;
     // Start is called before the first frame update
     void Start()
@@ -15,13 +14,11 @@ public class ScoreTracker : MonoBehaviour
         ScoreToAdd = 1;
     }
 
-	public void EnemyKilled()
+	public void EnemyKilled(string gameObjectTag)
 	{
-		Score += ScoreToAdd;
-		if (Score >= ScoreTarget)
+		if (gameObjectTag == "NonPlayerPlaced")
 		{
-			PanelToActivate.SetActive(true);
+			Score += ScoreToAdd;
 		}
-		ScoreToAdd *= 2;
 	}
 }

@@ -35,7 +35,7 @@ public class Damageable : MonoBehaviour
             }
 
             DamageableHealthBelowZeroHandler?.Invoke(this, EventArgs.Empty);
-            ScoreTracker.EnemyKilled();
+            ScoreTracker.EnemyKilled(gameObject.tag);
             return;
         }
 

@@ -1427,6 +1427,9 @@ MonoBehaviour:
   destinationUpdateRate: 0.1
   attacksPerSecond: 1
   damageDone: 20
+  objectToSpawnOnDeath: {fileID: 8986902767674089618, guid: a0f351753f75964469dc75a23690f793,
+    type: 3}
+  spawnChance: 0.2
 --- !u!114 &5793422547069023657
 MonoBehaviour:
   m_ObjectHideFlags: 0

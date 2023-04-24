@@ -33,10 +33,10 @@ public class LevelGeneratorEditor : Editor
         map = new int[generator.MapSize, generator.MapSize];
         GenerateMap();
 
-        for (var i = 0; i < generator.SmoothingIterations; i++)
+        /*for (var i = 0; i < generator.SmoothingIterations; i++)
         {
             Wallify(generator.WallifyStep);
-        }
+        }*/
         
         SmoothMap();
         FillGaps();
@@ -47,7 +47,7 @@ public class LevelGeneratorEditor : Editor
         CombineLightProbes();
     }
 
-    private void Wallify(int step)
+    /*private void Wallify(int step)
     {
         for (var x = 2; x < generator.MapSize - 2; x+=step)
         {
@@ -93,7 +93,7 @@ public class LevelGeneratorEditor : Editor
                 }
             }
         }
-    }
+    }*/
 
     private void Line()
     {

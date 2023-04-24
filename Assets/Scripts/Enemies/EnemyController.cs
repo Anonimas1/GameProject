@@ -1,26 +1,49 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
+[RequireComponent(typeof(Damageable))]
 public class EnemyController : MonoBehaviour
 {
     public Transform destination;
-    public float destinationUpdateRate;
+
+    [SerializeField]
+    private float destinationUpdateRate;
+
+    [SerializeField]
     public float attacksPerSecond = 1;
+
+    [SerializeField]
     public int damageDone = 2;
-    
-    
+
+    [Header("On death")]
+    [SerializeField]
+    private GameObject objectToSpawnOnDeath;
+
+    [SerializeField]
+    private float spawnChance = 0.2f;
+
+    private Damageable damageable;
     private NavMeshAgent agent;
     private float secondsSinceLastAttack = 0f;
     private bool canAttack = true;
-    
+
     void Start()
     {
+        damageable = GetComponent<Damageable>();
+        damageable.DamageableHealthBelowZeroHandler += (_, _) => SpawnOnDeath();
         agent = GetComponent<NavMeshAgent>();
-        StartCoroutine(UpdateTargetPosition());
+        UpdateTargetPosition();
+    }
+
+    private void SpawnOnDeath()
+    {
+        if (Random.Range(0, 1f) < spawnChance)
+        {
+            Instantiate(objectToSpawnOnDeath, transform.position, Quaternion.identity);
+        }
     }
 
     private void Update()
@@ -35,15 +58,13 @@ public class EnemyController : MonoBehaviour
             secondsSinceLastAttack = 0f;
             canAttack = true;
         }
+
+        UpdateTargetPosition();
     }
 
-    private IEnumerator UpdateTargetPosition()
+    private void UpdateTargetPosition()
     {
-        while (true)
-        {
-            agent.destination = destination.position;
-            yield return new WaitForSeconds(destinationUpdateRate);
-        }
+        agent.destination = destination.position;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -56,7 +77,6 @@ public class EnemyController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        //Debug.Log("stay");
         if (other.gameObject.TryGetComponent<Damageable>(out var damageable))
         {
             Attack(damageable);
@@ -68,7 +88,7 @@ public class EnemyController : MonoBehaviour
         if (canAttack)
         {
             damageable.TakeDamage(damageDone);
-            canAttack = false;   
+            canAttack = false;
         }
     }
 }

@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using StarterAssets;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class Weapon : MonoBehaviour
 {
@@ -43,17 +40,7 @@ public class Weapon : MonoBehaviour
             _input.Reload = false;
         }
         
-        var ray = new Ray(FiringPoint.position, _input.MousePositionInWorldSpace - FiringPoint.position);
-        if (Physics.Raycast(ray, out var hintData, 1000))
-        {
-            Debug.DrawLine(ray.origin, hintData.point, Color.red);
-        }
-        
-        
-
         _timePassedAfterShot += Time.deltaTime;
-        
-        //Hack for now
     }
 
     private bool CanShoot()
@@ -61,7 +48,7 @@ public class Weapon : MonoBehaviour
         return _timePassedAfterShot >= DelayBetweenShots && BulletsInMagazine > 0;
     }
 
-    public void Reload()
+    private void Reload()
     {
         if (BulletsInMagazine == MagazineCapacity || BulletsInInventory == 0)
         {
@@ -80,10 +67,15 @@ public class Weapon : MonoBehaviour
         BulletsInInventory = 0;
     }
 
-    public void Shoot()
+    private void Shoot()
     {
         BulletsInMagazine--;
         Instantiate(Projectile, FiringPoint.position, FiringPoint.rotation);
         gunshotAudio.Play();
+    }
+
+    public void RefillAmmo(int ammount)
+    {
+        BulletsInInventory += ammount;
     }
 }
