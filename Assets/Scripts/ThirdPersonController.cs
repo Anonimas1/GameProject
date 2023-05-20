@@ -83,7 +83,6 @@ namespace StarterAssets
         {
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
-
             AssignAnimationIDs();
 
             // reset our timeouts on start

@@ -26,6 +26,10 @@ namespace StarterAssets
         [Header("Firing settings")]
         public bool Fire;
 
+        public UnityEvent OnNextWeapon;
+        public UnityEvent OnPrevWeapon;
+        
+
         [Header("Calculated values")]
         public Vector3 MousePositionInWorldSpace;
 
@@ -45,6 +49,8 @@ namespace StarterAssets
             actionMap.FindAction("Reload").performed += OnReload;
             actionMap.FindAction("Pause").performed += (_) => OnPause.Invoke();
             actionMap.FindAction("PlaceBarrel").performed += OnBarrelPlace;
+            actionMap.FindAction("NextWeapon").performed += (_) => OnNextWeapon.Invoke();
+            actionMap.FindAction("PrevWeapon").performed += (_) => OnPrevWeapon.Invoke();
         }
 
         private void Update()

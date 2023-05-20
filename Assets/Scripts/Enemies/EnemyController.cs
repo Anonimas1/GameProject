@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
@@ -48,6 +49,21 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
+        if (!IsTargetReachable())
+        {
+            var origin = transform.position;
+            var direction = destination.position - transform.position;
+            var ray = new Ray(origin, direction);
+
+            var hits = Physics.RaycastAll(ray, 200f);
+            var firstBarrel = hits.FirstOrDefault(x => x.transform.gameObject.CompareTag("PlayerPlaced"));
+            agent.destination = firstBarrel.transform.position; 
+        }
+        else
+        {
+            UpdateTargetPosition();
+        }
+        
         if (!canAttack)
         {
             secondsSinceLastAttack += Time.deltaTime;
@@ -58,8 +74,18 @@ public class EnemyController : MonoBehaviour
             secondsSinceLastAttack = 0f;
             canAttack = true;
         }
+    }
 
-        UpdateTargetPosition();
+    private bool IsTargetReachable()
+    {
+        var lasCorner = agent.path.corners.Last();
+        if (destination.position.x != lasCorner.x && destination.position.z != lasCorner.z ||
+            agent.path.status != NavMeshPathStatus.PathComplete)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private void UpdateTargetPosition()
@@ -69,6 +95,11 @@ public class EnemyController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (other.gameObject.tag == "NonPlayerPlaced")
+        {
+            return;
+        }
+        
         if (other.gameObject.TryGetComponent<Damageable>(out var damageable))
         {
             Attack(damageable);
@@ -77,6 +108,11 @@ public class EnemyController : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        if (other.gameObject.tag == "NonPlayerPlaced")
+        {
+            return;
+        }
+        
         if (other.gameObject.TryGetComponent<Damageable>(out var damageable))
         {
             Attack(damageable);

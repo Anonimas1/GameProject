@@ -6,6 +6,7 @@ TagManager:
   tags:
   - ScoreTracker
   - NonPlayerPlaced
+  - PlayerPlaced
   layers:
   - Default
   - TransparentFX
