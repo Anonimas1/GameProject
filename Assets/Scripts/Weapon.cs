@@ -1,14 +1,16 @@
 using StarterAssets;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class Weapon : MonoBehaviour
+public class Weapon : MonoBehaviour, IWeapon
 {
     public GameObject Projectile;
     public Transform FiringPoint;
     [Header("Delay between shorts in seconds")]
     public float DelayBetweenShots = 1;
-    
+
     [Header("Magazine settings")]
+    [SerializeField]
     public int BulletsInInventory = 90;
     public int MagazineCapacity = 30;
     public int BulletsInMagazine = 30;
@@ -20,13 +22,15 @@ public class Weapon : MonoBehaviour
     private StarterAssetsInputs _input;
     
     private float _timePassedAfterShot;
+
+
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         _input = gameObject.GetComponentInParent<StarterAssetsInputs>();
     }
-    
-    void Update()
+
+    private void Update()
     {
         if (_input.Fire && CanShoot())
         {
@@ -74,8 +78,18 @@ public class Weapon : MonoBehaviour
         gunshotAudio.Play();
     }
 
-    public void RefillAmmo(int ammount)
+    public void RefillAmmo(int amount)
     {
-        BulletsInInventory += ammount;
+        BulletsInInventory += amount;
     }
+
+    public bool HasAmmo()
+    {
+        return BulletsInInventory > 0 || BulletsInMagazine > 0;
+    }
+}
+
+public interface IWeapon
+{
+    bool HasAmmo();
 }
