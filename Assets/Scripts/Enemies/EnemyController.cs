@@ -1,130 +1,194 @@
-using System;
-using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
-using Random = UnityEngine.Random;
 
-[RequireComponent(typeof(Damageable))]
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(IAttacker))]
 public class EnemyController : MonoBehaviour
 {
-    public Transform destination;
+    [Header("Player settings")]
+    [SerializeField]
+    private string playerTag = "Player";
 
     [SerializeField]
-    private float destinationUpdateRate;
+    private LayerMask playerMask;
+
+    [Header("Attack settings")]
+    [SerializeField]
+    private IAttacker meleeAttacker;
+
+    private bool _isInAttackRange = false;
+
+    [Header("Obstacle attack settings")]
+    [SerializeField]
+    private LayerMask damageableMask;
 
     [SerializeField]
-    public float attacksPerSecond = 1;
+    private LayerMask damageableExplosiveMask;
 
     [SerializeField]
-    public int damageDone = 2;
-
-    [Header("On death")]
-    [SerializeField]
-    private GameObject objectToSpawnOnDeath;
+    private Animator animator;
 
     [SerializeField]
-    private float spawnChance = 0.2f;
+    private float movementThreshold = 0.2f;
 
-    private Damageable damageable;
-    private NavMeshAgent agent;
-    private float secondsSinceLastAttack = 0f;
-    private bool canAttack = true;
+    private int walkParameterId;
+
+    private bool isAttackingObsticle;
+    private Damageable CurrentObsticle;
+
+    private Transform PlayerTransform;
+    private Damageable PlayerDamagable;
+    private Vector3 TargetPosition;
+
+    private bool PathFound;
+    private NavMeshPath _calculatedPath;
+    private NavMeshAgent _agent;
+
+    [Header("Debug")]
+    [SerializeField]
+    private float sphereRadius = 0.2f;
+
+    [SerializeField]
+    private float attackRangeOpacity = 0.2f;
+
+    [SerializeField]
+    private bool stayInPlace = false;
+
+    [SerializeField]
+    private float remainingDistance;
+
+    [SerializeField]
+    private State CurrentState;
+
+    private enum State
+    {
+        ChasingPlayer = 0,
+        AttackingPlayer,
+        MovingToClosestPosition,
+        AttackingObstacle,
+        StandingStill
+    }
 
     void Start()
     {
-        damageable = GetComponent<Damageable>();
-        damageable.DamageableHealthBelowZeroHandler += (_, _) => SpawnOnDeath();
-        agent = GetComponent<NavMeshAgent>();
-        UpdateTargetPosition();
+        _agent = GetComponent<NavMeshAgent>();
+        _calculatedPath = new NavMeshPath();
+        PlayerTransform = GameObject.FindWithTag(playerTag).transform;
+        PlayerDamagable = PlayerTransform.GetComponent<Damageable>();
+        TargetPosition = PlayerTransform.position;
+        meleeAttacker = GetComponent<IAttacker>();
+        CurrentState = State.StandingStill;
+        walkParameterId = Animator.StringToHash("Walk Forward");
     }
 
-    private void SpawnOnDeath()
+
+    private void UpdateState()
     {
-        if (Random.Range(0, 1f) < spawnChance)
+        if (stayInPlace && CurrentState != State.StandingStill)
         {
-            Instantiate(objectToSpawnOnDeath, transform.position, Quaternion.identity);
+            CurrentState = State.StandingStill;
+            return;
         }
+
+        _isInAttackRange = Physics.CheckSphere(transform.position, meleeAttacker.Range, playerMask);
+
+        if (_isInAttackRange)
+        {
+            currentAttackTarget = PlayerDamagable;
+            CurrentState = State.AttackingPlayer;
+            return;
+        }
+
+        UpdatePath();
+
+        if (PathFound)
+        {
+            CurrentState = State.ChasingPlayer;
+            return;
+        }
+
+        CurrentState = State.MovingToClosestPosition;
     }
+
+    private Damageable currentAttackTarget;
+
 
     private void Update()
     {
-        if (!IsTargetReachable())
+        animator.SetBool(walkParameterId, _agent.velocity.magnitude > movementThreshold);
+        
+        switch (CurrentState)
         {
-            var origin = transform.position;
-            var direction = destination.position - transform.position;
-            var ray = new Ray(origin, direction);
+            case State.AttackingPlayer:
+            case State.AttackingObstacle:
+                if (currentAttackTarget != null && Vector3.Distance(currentAttackTarget.transform.position, transform.position) <= meleeAttacker.Range)
+                {
+                    _agent.destination = transform.position;
+                    Quaternion neededRotation = Quaternion.LookRotation(currentAttackTarget.transform.position - transform.position);
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, neededRotation, Time.deltaTime * 360f);  
+                    meleeAttacker.Attack(currentAttackTarget);
+                }
+                else
+                {
+                    UpdateState();
+                }
+                break;
+            case State.MovingToClosestPosition:
+                _agent.SetDestination(_calculatedPath.corners.Last());
+                if (_agent.remainingDistance < meleeAttacker.Range)
+                {
+                    var colliders = Physics.OverlapSphere(transform.position, meleeAttacker.Range, damageableMask);
+                    if (colliders.Any())
+                    {
+                        currentAttackTarget = colliders[0].GetComponent<Damageable>();
+                        CurrentState = State.AttackingObstacle;
+                        return;
+                    }
+                }
 
-            var hits = Physics.RaycastAll(ray, 200f);
-            var firstBarrel = hits.FirstOrDefault(x => x.transform.gameObject.CompareTag("PlayerPlaced"));
-            agent.destination = firstBarrel.transform.position; 
+                UpdateState();
+                break;
+            case State.ChasingPlayer:
+                _agent.SetDestination(PlayerTransform.position);
+                UpdateState();
+                break;
+            case State.StandingStill:
+                _agent.SetDestination(transform.position);
+                UpdateState();
+                break;
+        }
+        
+        Debug.Log(TargetPosition);
+    }
+
+    private void UpdatePath()
+    {
+        PathFound = _agent.CalculatePath(PlayerTransform.position, _calculatedPath) && _calculatedPath.status == NavMeshPathStatus.PathComplete;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        foreach (var corner in _calculatedPath.corners)
+        {
+            Gizmos.DrawSphere(corner, sphereRadius);
+        }
+
+        Debug.Log($"{_calculatedPath.status} {PathFound}");
+        remainingDistance = _agent.remainingDistance;
+        if (_isInAttackRange)
+        {
+            var color = Color.red;
+            color.a = attackRangeOpacity;
+            Gizmos.color = color;
+            Gizmos.DrawSphere(transform.position, meleeAttacker.Range);
         }
         else
         {
-            UpdateTargetPosition();
-        }
-        
-        if (!canAttack)
-        {
-            secondsSinceLastAttack += Time.deltaTime;
-        }
-
-        if (secondsSinceLastAttack >= 1 / attacksPerSecond)
-        {
-            secondsSinceLastAttack = 0f;
-            canAttack = true;
-        }
-    }
-
-    private bool IsTargetReachable()
-    {
-        var lasCorner = agent.path.corners.Last();
-        if (destination.position.x != lasCorner.x && destination.position.z != lasCorner.z ||
-            agent.path.status != NavMeshPathStatus.PathComplete)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private void UpdateTargetPosition()
-    {
-        agent.destination = destination.position;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.tag == "NonPlayerPlaced")
-        {
-            return;
-        }
-        
-        if (other.gameObject.TryGetComponent<Damageable>(out var damageable))
-        {
-            Attack(damageable);
-        }
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.gameObject.tag == "NonPlayerPlaced")
-        {
-            return;
-        }
-        
-        if (other.gameObject.TryGetComponent<Damageable>(out var damageable))
-        {
-            Attack(damageable);
-        }
-    }
-
-    private void Attack(Damageable damageable)
-    {
-        if (canAttack)
-        {
-            damageable.TakeDamage(damageDone);
-            canAttack = false;
+            var color = Color.green;
+            color.a = attackRangeOpacity;
+            Gizmos.color = color;
+            Gizmos.DrawSphere(transform.position, meleeAttacker.Range);
         }
     }
 }

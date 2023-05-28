@@ -7,15 +7,16 @@ TagManager:
   - ScoreTracker
   - NonPlayerPlaced
   - PlayerPlaced
+  - CinemachineTarget
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
+  - DestructableNonExplosive
+  - Ground
   - 
   - 
   - 

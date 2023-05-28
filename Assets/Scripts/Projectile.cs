@@ -1,11 +1,18 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
 {
-    public int DamageCaused = 1;
-    public float TimeUntilDestroy = 1f;
+    [SerializeField]
+    private int damageCaused = 1;
+
+    [SerializeField]
+    private float timeUntilDestroy = 0.4f;
+
+    [SerializeField]
+    private float force = 50f;
 
     private Transform _objectTransform;
     private Rigidbody _rigidbody;
@@ -14,13 +21,13 @@ public class Projectile : MonoBehaviour
     {
         _objectTransform = transform;
         _rigidbody = GetComponent<Rigidbody>();
-        _rigidbody.AddForce(_objectTransform.forward * 0.0005f);
+        _rigidbody.AddForce(_objectTransform.forward * force);
         StartCoroutine(DestroyProjectile());
     }
 
     IEnumerator DestroyProjectile()
     {
-        yield return new WaitForSeconds(TimeUntilDestroy);
+        yield return new WaitForSeconds(timeUntilDestroy);
         Destroy(gameObject);
     }
 
@@ -28,9 +35,8 @@ public class Projectile : MonoBehaviour
     {
         if (other.gameObject.TryGetComponent<Damageable>(out var damagable))
         {
-            damagable.TakeDamage(DamageCaused);
+            damagable.TakeDamage(damageCaused);
+            Destroy(gameObject);
         }
-
-        Destroy(gameObject);
     }
 }

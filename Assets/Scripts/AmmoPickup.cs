@@ -1,21 +1,18 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using DefaultNamespace;
 using UnityEngine;
 
 public class AmmoPickup : MonoBehaviour
 {
-    [SerializeField]
-    private int Ammount = 20;
+    public int Ammount = 20;
+    public string WeaponName;
 
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Player")
         {
-            other.gameObject.GetComponentInChildren<Weapon>().RefillAmmo(Ammount);
+            other.gameObject.GetComponentInChildren<WeaponInventory>().AddAmmo(WeaponName, Ammount);
             Destroy(gameObject);
         }
     }
 }
-

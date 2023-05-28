@@ -1,8 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using StarterAssets;
 using UnityEngine;
-using UnityEngine.Serialization;
+using UnityEngine.Animations.Rigging;
 
 namespace DefaultNamespace
 {
@@ -11,6 +10,9 @@ namespace DefaultNamespace
     {
         [SerializeField]
         private GameObject[] weapons;
+
+        [SerializeField]
+        private RigBuilder rigBuilder;
 
         private IWeapon[] _weapons;
         private int _currentSelected = 0;
@@ -29,6 +31,7 @@ namespace DefaultNamespace
         private void ChooseNext()
         {
             weapons[_currentSelected].SetActive(false);
+            rigBuilder.layers[_currentSelected].active = false;
 
             _currentSelected = GetIndex(++_currentSelected);
             var weapon = _weapons[_currentSelected];
@@ -39,11 +42,13 @@ namespace DefaultNamespace
             }
 
             weapons[_currentSelected].SetActive(true);
+            rigBuilder.layers[_currentSelected].active = true;
         }
 
         private void ChoosePrev()
         {
             weapons[_currentSelected].SetActive(false);
+            rigBuilder.layers[_currentSelected].active = false;
 
             _currentSelected = GetIndex(--_currentSelected);
             var weapon = _weapons[_currentSelected];
@@ -54,6 +59,7 @@ namespace DefaultNamespace
             }
 
             weapons[_currentSelected].SetActive(true);
+            rigBuilder.layers[_currentSelected].active = true;
         }
 
         private int GetIndex(int index)
@@ -69,6 +75,12 @@ namespace DefaultNamespace
             }
 
             return index;
+        }
+
+        public void AddAmmo(string weaponName, int amount)
+        {
+            var weapon = _weapons.First(x => x.WeaponName == weaponName);
+            weapon.RefillAmmo(amount);
         }
     }
 }

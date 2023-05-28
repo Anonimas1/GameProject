@@ -1,18 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
 public class BulletDisplay : MonoBehaviour
 {
-    public TMP_Text CurentCount;
     public TMP_Text InventoryCount;
-    public Weapon Weapon;
+    public Weapon[] Weapons;
 
     // Update is called once per frame
     void Update()
     {
-        CurentCount.text = Weapon.BulletsInMagazine.ToString();
-        InventoryCount.text = Weapon.BulletsInInventory.ToString();
+        var weapon = Weapons.First(x => x.isActiveAndEnabled);
+        var ammo = weapon.Bullets == Constants.InfiniteAmmo
+            ? "∞"
+            : weapon.Bullets.ToString();
+        InventoryCount.text = ammo;
     }
 }

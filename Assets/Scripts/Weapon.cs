@@ -2,94 +2,104 @@ using StarterAssets;
 using UnityEngine;
 using UnityEngine.Serialization;
 
+public interface IWeapon
+{
+    bool HasAmmo();
+    void RefillAmmo(int ammount);
+    string WeaponName { get; }
+}
+
+public static class Constants
+{
+    public const int InfiniteAmmo = -1;
+    public const string AK47 = nameof(AK47);
+    public const string M1911Pistol = nameof(M1911Pistol);
+    public const string Shotgun = nameof(Shotgun);
+    public const string RPG = nameof(RPG);
+    public const string Barrel = nameof(Barrel);
+    public const string Box = nameof(Box);
+}
+
 public class Weapon : MonoBehaviour, IWeapon
 {
-    public GameObject Projectile;
-    public Transform FiringPoint;
-    [Header("Delay between shorts in seconds")]
-    public float DelayBetweenShots = 1;
-
-    [Header("Magazine settings")]
+    public string WeaponName => _weaponName;
+    
     [SerializeField]
-    public int BulletsInInventory = 90;
-    public int MagazineCapacity = 30;
-    public int BulletsInMagazine = 30;
+    private string _weaponName;
 
+    [SerializeField]
+    protected GameObject projectile;
+    
+    [SerializeField]
+    protected Transform firingPoint;
+    
+    [Header("Delay between shorts in seconds")]
+    [SerializeField]
+    private float delayBetweenShots = 1;
+    
+    [SerializeField]
+    private bool hasInfiniteAmmo = false;
+
+    public int Bullets = 90;
+    
     [Header("Audio settings")]
     public AudioSource gunshotAudio;
-    
 
-    private StarterAssetsInputs _input;
-    
+    protected StarterAssetsInputs _input;
+
+    [SerializeField]
     private float _timePassedAfterShot;
 
 
-    // Start is called before the first frame update
     private void Start()
     {
+        if (hasInfiniteAmmo)
+        {
+            Bullets = Constants.InfiniteAmmo;
+        }
+
         _input = gameObject.GetComponentInParent<StarterAssetsInputs>();
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (_input.Fire && CanShoot())
         {
             Shoot();
+            
+            if (!hasInfiniteAmmo)
+            {
+                Bullets--;
+            }
+            
+            if (gunshotAudio != null)
+                gunshotAudio.Play();
             _timePassedAfterShot = 0f;
         }
 
-        if (_input.Reload)
-        {
-            Reload();
-            _input.Reload = false;
-        }
-        
         _timePassedAfterShot += Time.deltaTime;
     }
 
     private bool CanShoot()
     {
-        return _timePassedAfterShot >= DelayBetweenShots && BulletsInMagazine > 0;
+        return _timePassedAfterShot >= delayBetweenShots && HasAmmo();
     }
 
-    private void Reload()
+    protected virtual void Shoot()
     {
-        if (BulletsInMagazine == MagazineCapacity || BulletsInInventory == 0)
-        {
-            return;
-        }
-
-        var requiredBullets = MagazineCapacity - BulletsInMagazine;
-        if (BulletsInInventory >= requiredBullets)
-        {
-            BulletsInInventory -= requiredBullets;
-            BulletsInMagazine += requiredBullets;
-            return;
-        }
-
-        BulletsInMagazine += BulletsInInventory;
-        BulletsInInventory = 0;
-    }
-
-    private void Shoot()
-    {
-        BulletsInMagazine--;
-        Instantiate(Projectile, FiringPoint.position, FiringPoint.rotation);
-        gunshotAudio.Play();
+        Instantiate(projectile, firingPoint.position, firingPoint.rotation);
     }
 
     public void RefillAmmo(int amount)
     {
-        BulletsInInventory += amount;
+        if (!hasInfiniteAmmo)
+        {
+            Bullets += amount;
+        }
     }
 
     public bool HasAmmo()
     {
-        return BulletsInInventory > 0 || BulletsInMagazine > 0;
+        return hasInfiniteAmmo || Bullets > 0;
     }
-}
-
-public interface IWeapon
-{
-    bool HasAmmo();
 }

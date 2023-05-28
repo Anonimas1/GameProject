@@ -1,7 +1,9 @@
 using System;
+using DefaultNamespace;
 using JetBrains.Annotations;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 public class Damageable : MonoBehaviour
 {
@@ -12,6 +14,15 @@ public class Damageable : MonoBehaviour
     public event EventHandler<int> CurrentHealthChangedEventHandler;
     public event EventHandler DamageableHealthBelowZeroHandler;
 
+    [SerializeField]
+    private bool dropItemOnDeath;
+    
+    [SerializeField]
+    private GameObject ammoPickup;
+
+    public LootTable LootTable;
+    
+    
     [SerializeField]
     [CanBeNull]
     private AudioSource damageTakenAudio;
@@ -29,6 +40,15 @@ public class Damageable : MonoBehaviour
         CurrentHealth -= damageAmount;
         if (CurrentHealth <= 0)
         {
+            if (dropItemOnDeath)
+            {
+                var amounts = LootTable.GetRandom();
+                var obj = Instantiate(ammoPickup, transform.position, Quaternion.identity);
+                var component = obj.GetComponent<AmmoPickup>();
+                component.WeaponName = amounts.WeaponName;
+                component.Ammount = amounts.Amount;
+            }
+            
             if (DestroyOnHealthZero)
             {
                 Destroy(gameObject);

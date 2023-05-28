@@ -13,32 +13,14 @@ namespace StarterAssets
     public class ThirdPersonController : MonoBehaviour
     {
         [Header("Player")]
-        [Tooltip("Move speed of the character in m/s")]
-        public float MoveSpeed = 2.0f;
-
         [Tooltip("Sprint speed of the character in m/s")]
-        public float SprintSpeed = 5.335f;
-
-        [Tooltip("How fast the character turns to face movement direction")]
-        [Range(0.0f, 0.3f)]
-        public float RotationSmoothTime = 0.12f;
+        public float MoveSpeed = 5.335f;
 
         [Tooltip("Acceleration and deceleration")]
         public float SpeedChangeRate = 10.0f;
 
-        [Range(0, 1)]
-        public float FootstepAudioVolume = 0.5f;
-
-        [Space(10)]
-        [Tooltip("The height the player can jump")]
-        public float JumpHeight = 1.2f;
-
         [Tooltip("The character uses its own gravity value. The engine default is -9.81f")]
         public float Gravity = -15.0f;
-
-        [Space(10)]
-        [Tooltip("Time required to pass before being able to jump again. Set to 0f to instantly jump again")]
-        public float JumpTimeout = 0.50f;
 
         [Tooltip("Time required to pass before entering the fall state. Useful for walking down stairs")]
         public float FallTimeout = 0.15f;
@@ -64,30 +46,34 @@ namespace StarterAssets
 
         // player
         private float _targetRotation;
-        private float _rotationVelocity;
         private float _verticalVelocity;
         private float _terminalVelocity = 53.0f;
 
-        // timeout deltatime
-        private float _jumpTimeoutDelta;
         private float _fallTimeoutDelta;
 
-        // animation IDs
-        private int _animState;
+        [SerializeField]
+        private Animator animator;
 
-        public Animator animator;
         private CharacterController _controller;
         private StarterAssetsInputs _input;
+
+
+        [SerializeField]
+        private float movementThreshold = 0.002f;
+
+        [SerializeField]
+        private Vector3 horizontalVelocity;
+
+        private int _xAnimatorParam;
+        private int _zAnimatorParam;
 
         private void Start()
         {
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
-            AssignAnimationIDs();
-
-            // reset our timeouts on start
-            _jumpTimeoutDelta = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+            _xAnimatorParam = Animator.StringToHash("xDir");
+            _zAnimatorParam = Animator.StringToHash("zDir");
         }
 
         private void Update()
@@ -96,6 +82,20 @@ namespace StarterAssets
             GroundedCheck();
             MoveAndRotate();
             PlayWalkAudio();
+
+            horizontalVelocity = transform.InverseTransformVector(_controller.velocity);
+
+            animator.SetInteger(_xAnimatorParam, GetAnimationParameterValue(horizontalVelocity.x));
+            animator.SetInteger(_zAnimatorParam,GetAnimationParameterValue(horizontalVelocity.z));
+        }
+
+        private int GetAnimationParameterValue(float value)
+        {
+            if (value > 0)
+                return value < movementThreshold ? 0 : 1;
+
+
+            return Mathf.Abs(value) < movementThreshold ? 0 : -1;
         }
 
         private void PlayWalkAudio()
@@ -104,7 +104,7 @@ namespace StarterAssets
             {
                 footstepAudio.Play();
             }
-            else if(!isWalking && footstepAudio.isPlaying)
+            else if (!isWalking && footstepAudio.isPlaying)
             {
                 footstepAudio.Stop();
             }
@@ -115,15 +115,10 @@ namespace StarterAssets
             return (_input.MousePositionInWorldSpace - transform.position).normalized;
         }
 
-        private void AssignAnimationIDs()
-        {
-            _animState = Animator.StringToHash("AnimationState");
-        }
-
         private void GroundedCheck()
         {
             // set sphere position, with offset
-            Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,
+            var spherePosition = new Vector3(transform.position.x, transform.position.y - GroundedOffset,
                 transform.position.z);
             Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers,
                 QueryTriggerInteraction.Ignore);
@@ -133,28 +128,9 @@ namespace StarterAssets
         {
             var targetSpeed = _input.Move == Vector2.zero
                 ? 0.0f
-                : _input.Sprint
-                    ? SprintSpeed
-                    : MoveSpeed;
-            SetAnimationState(targetSpeed);
+                : MoveSpeed;
             MovePlayer(targetSpeed);
             RotatePlayer();
-        }
-
-        private void SetAnimationState(float speed)
-        {
-            if (Math.Abs(speed - 0)  < 0.2f)
-            {
-                animator.SetInteger(_animState, 0);
-            }
-            else if (Math.Abs(speed - MoveSpeed) < 0.5)
-            {
-                animator.SetInteger(_animState, 1);
-            }
-            else if (Math.Abs(speed - SprintSpeed) < 0.5)
-            {
-                animator.SetInteger(_animState, 2);
-            }
         }
 
         private void MovePlayer(float targetSpeed)
@@ -191,11 +167,9 @@ namespace StarterAssets
         {
             var targetRotationVector = GetTargetRotationVector();
             _targetRotation = Mathf.Atan2(targetRotationVector.x, targetRotationVector.z) * Mathf.Rad2Deg;
-            float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetRotation, ref _rotationVelocity,
-                RotationSmoothTime);
 
             // rotate to face mouse cursor
-            transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+            transform.rotation = Quaternion.Euler(0.0f, _targetRotation, 0.0f);
         }
 
         private void JumpAndGravity()
@@ -208,33 +182,14 @@ namespace StarterAssets
                 {
                     _verticalVelocity = -2f;
                 }
-
-                // Jump
-                if (_input.Jump && _jumpTimeoutDelta <= 0.0f)
-                {
-                    // the square root of H * -2 * G = how much velocity needed to reach desired height
-                    _verticalVelocity = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-                }
-
-                // jump timeout
-                if (_jumpTimeoutDelta >= 0.0f)
-                {
-                    _jumpTimeoutDelta -= Time.deltaTime;
-                }
             }
             else
             {
-                // reset the jump timeout timer
-                _jumpTimeoutDelta = JumpTimeout;
-
                 // fall timeout
                 if (_fallTimeoutDelta >= 0.0f)
                 {
                     _fallTimeoutDelta -= Time.deltaTime;
                 }
-
-                // if we are not grounded, do not jump
-                _input.Jump = false;
             }
 
             // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)

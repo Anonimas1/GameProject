@@ -99,8 +99,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e88ddd031a69d6c47a2238e890873eec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DamageCaused: 3
-  TimeUntilDestroy: 0.4
+  damageCaused: 1
+  timeUntilDestroy: 0.4
+  force: 4000
 --- !u!136 &1157507458341321705
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -123,10 +124,10 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 924459601785752932}
   serializedVersion: 2
-  m_Mass: 0.0000001
+  m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
   m_Constraints: 112
@@ -182,7 +183,7 @@ TrailRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0.081677414
-        value: 0.30931064
+        value: 0.57920814
         inSlope: 0
         outSlope: 0
         tangentMode: 0
