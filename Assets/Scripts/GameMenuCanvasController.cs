@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using StarterAssets;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace DefaultNamespace
@@ -100,6 +101,7 @@ namespace DefaultNamespace
         private void PauseGame()
         {
             Time.timeScale = 0;
+            damageableToTrack.gameObject.GetComponent<ThirdPersonController>().enabled = false;
             isPaused = true;
         }
 
@@ -107,6 +109,7 @@ namespace DefaultNamespace
         {
             Time.timeScale = 1;
             isPaused = false;
+            damageableToTrack.gameObject.GetComponent<ThirdPersonController>().enabled = true;
         }
 
         public void StartGame()

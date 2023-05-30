@@ -102,10 +102,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffe426805c230904ba8a01f5e9e53836, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MaxHealth: 10
-  CurrentHealth: 10
+  MaxHealth: 100
+  CurrentHealth: 100
   DestroyOnHealthZero: 1
   ScoreTracker: {fileID: 0}
+  dropItemOnDeath: 0
+  ammoPickup: {fileID: 0}
   damageTakenAudio: {fileID: 0}
 --- !u!136 &4592345041266105968
 CapsuleCollider:

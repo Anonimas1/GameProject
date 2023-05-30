@@ -158,8 +158,6 @@ public class EnemyController : MonoBehaviour
                 UpdateState();
                 break;
         }
-        
-        Debug.Log(TargetPosition);
     }
 
     private void UpdatePath()
@@ -173,8 +171,7 @@ public class EnemyController : MonoBehaviour
         {
             Gizmos.DrawSphere(corner, sphereRadius);
         }
-
-        Debug.Log($"{_calculatedPath.status} {PathFound}");
+        
         remainingDistance = _agent.remainingDistance;
         if (_isInAttackRange)
         {

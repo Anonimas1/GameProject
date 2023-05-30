@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 public class Projectile : MonoBehaviour
@@ -33,7 +32,7 @@ public class Projectile : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.TryGetComponent<Damageable>(out var damagable))
+        if (!other.gameObject.CompareTag("Player") && other.gameObject.TryGetComponent<Damageable>(out var damagable))
         {
             damagable.TakeDamage(damageCaused);
             Destroy(gameObject);

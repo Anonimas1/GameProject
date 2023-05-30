@@ -45,6 +45,8 @@ public class Weapon : MonoBehaviour, IWeapon
     [Header("Audio settings")]
     public AudioSource gunshotAudio;
 
+    public AudioClip AudioClip;
+    public float volume = 1f;
     protected StarterAssetsInputs _input;
 
     [SerializeField]
@@ -74,6 +76,14 @@ public class Weapon : MonoBehaviour, IWeapon
             
             if (gunshotAudio != null)
                 gunshotAudio.Play();
+
+            if (AudioClip != null)
+            {
+                var soundpos = firingPoint.position;
+                soundpos.y += 13;
+                AudioSource.PlayClipAtPoint(AudioClip, soundpos,volume );
+            }
+                
             _timePassedAfterShot = 0f;
         }
 

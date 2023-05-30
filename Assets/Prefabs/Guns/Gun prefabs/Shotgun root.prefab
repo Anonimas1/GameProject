@@ -146,7 +146,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 28f0b13c7e9707746b5e0b3336181560, type: 2}
+  - {fileID: 2100000, guid: 5d8e63d38a6d8274793d0b1ba5f684a6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -229,7 +229,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 28f0b13c7e9707746b5e0b3336181560, type: 2}
+  - {fileID: 2100000, guid: 5d8e63d38a6d8274793d0b1ba5f684a6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -328,6 +328,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91bc316597c64cfaa9269587001d0bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _weaponName: 
   projectile: {fileID: 924459601785752932, guid: 1f5f7bfb1eecb0c48b90cca28ea1602e,
     type: 3}
   firingPoint: {fileID: 6265042847004121764}
@@ -335,5 +336,8 @@ MonoBehaviour:
   hasInfiniteAmmo: 0
   Bullets: 90
   gunshotAudio: {fileID: 0}
+  AudioClip: {fileID: 0}
+  volume: 1
+  _timePassedAfterShot: 0
   pelletCount: 8
   spreadDegrees: 8

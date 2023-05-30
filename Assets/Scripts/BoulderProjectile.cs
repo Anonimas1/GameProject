@@ -17,6 +17,10 @@ public class BoulderProjectile : MonoBehaviour
     [SerializeField]
     private string PlayerTag = "Player";
 
+
+    [SerializeField]
+    private GameObject audioSourceObject;
+
     void Start()
     {
         StartCoroutine(DestroyProjectile());
@@ -34,6 +38,7 @@ public class BoulderProjectile : MonoBehaviour
         if (shouldDamage && other.gameObject.TryGetComponent<Damageable>(out var damagable))
         {
             damagable.TakeDamage(damageCaused);
+            Instantiate(audioSourceObject, transform.position, Quaternion.identity);
             Destroy(gameObject);
         }
     }

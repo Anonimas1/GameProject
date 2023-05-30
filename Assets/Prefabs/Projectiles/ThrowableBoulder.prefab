@@ -77,10 +77,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8808f095d0a41e7a8421980c806f33b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damageCaused: 1
+  damageCaused: 35
   timeUntilDestroy: 3
   PlayerPlacedTag: PlayerPlaced
   PlayerTag: Player
+  audioSourceObject: {fileID: 994266202857177229, guid: 5316f593661efe649804d04db19d7778,
+    type: 3}
 --- !u!1001 &8506928493929649582
 PrefabInstance:
   m_ObjectHideFlags: 0

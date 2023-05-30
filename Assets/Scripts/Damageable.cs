@@ -16,13 +16,14 @@ public class Damageable : MonoBehaviour
 
     [SerializeField]
     private bool dropItemOnDeath;
-    
+
     [SerializeField]
     private GameObject ammoPickup;
 
-    public LootTable LootTable;
-    
-    
+    public LootTable LootTable = new LootTable();
+
+    private bool isDead;
+
     [SerializeField]
     [CanBeNull]
     private AudioSource damageTakenAudio;
@@ -37,32 +38,41 @@ public class Damageable : MonoBehaviour
 
     public void TakeDamage(int damageAmount)
     {
+        if (isDead)
+        {
+            return;
+        }
+
         CurrentHealth -= damageAmount;
         if (CurrentHealth <= 0)
         {
             if (dropItemOnDeath)
             {
                 var amounts = LootTable.GetRandom();
-                var obj = Instantiate(ammoPickup, transform.position, Quaternion.identity);
-                var component = obj.GetComponent<AmmoPickup>();
-                component.WeaponName = amounts.WeaponName;
-                component.Ammount = amounts.Amount;
+                if (amounts.Amount != 0)
+                {
+                    var obj = Instantiate(ammoPickup, transform.position, Quaternion.identity);
+                    var component = obj.GetComponent<AmmoPickup>();
+                    component.WeaponName = amounts.WeaponName;
+                    component.Ammount = amounts.Amount;
+                }
             }
-            
+
             if (DestroyOnHealthZero)
             {
                 Destroy(gameObject);
             }
 
             DamageableHealthBelowZeroHandler?.Invoke(this, EventArgs.Empty);
-            ScoreTracker.EnemyKilled(gameObject.tag);
+            ScoreTracker.EnemyKilled(gameObject);
+            isDead = true;
             return;
         }
 
         CurrentHealthChangedEventHandler?.Invoke(this, CurrentHealth);
         if (_isDamageTakenAudioNotNull)
         {
-            damageTakenAudio.Play();   
+            damageTakenAudio.Play();
         }
     }
 }

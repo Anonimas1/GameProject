@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
@@ -32,22 +34,30 @@ namespace DefaultNamespace
             WeaponName = weaponName;
         }
     }
-    
+
     public class LootTable
     {
         private List<AmmoAmount> AmmoTable = new List<AmmoAmount>();
 
-        public void Add(AmmoAmount ammo, int chance)
+        public LootTable Add(AmmoAmount ammo, int chance)
         {
             for (int i = 0; i < chance; i++)
             {
                 AmmoTable.Add(ammo);
             }
+
+            return this;
         }
 
         public AmmoAmount GetRandom()
         {
-            return AmmoTable[Random.Range(0, AmmoTable.Count)];
+            if (AmmoTable.Count == 0)
+            {
+                return new AmmoAmount(0, "");
+            }
+
+            var index = Random.Range(0, AmmoTable.Count);
+            return AmmoTable[index];
         }
     }
 
@@ -57,10 +67,10 @@ namespace DefaultNamespace
         private SpawnPoint[] spawnPoints;
 
         [SerializeField]
-        private GameObject EnemyOne;
+        private GameObject MeleeEnemy;
 
         [SerializeField]
-        private GameObject EnemyTwo;
+        private GameObject RangeEnemy;
 
         [SerializeField]
         private Transform player;
@@ -72,7 +82,7 @@ namespace DefaultNamespace
         private List<List<WaveDescription>> _waves;
         private int _currentWave = 0;
 
-        private List<GameObject> _spawnedEnemies;
+        private List<GameObject> _spawnedEnemies = new List<GameObject>();
 
         [SerializeField]
         private float _timeSinceLastSpawn = 0f;
@@ -82,6 +92,11 @@ namespace DefaultNamespace
             if (_timeSinceLastSpawn < timeBetweenWaves)
             {
                 _timeSinceLastSpawn += Time.deltaTime;
+                return;
+            }
+
+            if (_spawnedEnemies.Any(x => x != null))
+            {
                 return;
             }
 
@@ -100,6 +115,7 @@ namespace DefaultNamespace
                 }
             }
 
+            _currentWave += 1;
             _timeSinceLastSpawn = 0f;
         }
 
@@ -107,40 +123,70 @@ namespace DefaultNamespace
         {
             return spawnPoints[Random.Range(0, spawnPoints.Length)];
         }
-        
-        
+
 
         private void Start()
         {
             var lootTable1 = new LootTable();
-            lootTable1.Add(new AmmoAmount(10, Constants.AK47), 1);
+            var lootTable2 = new LootTable()
+                .Add(new AmmoAmount(10, Constants.AK47), 10)
+                .Add(new AmmoAmount(0, ""), 40);
+            var lootTable3 = new LootTable()
+                .Add(new AmmoAmount(15, Constants.AK47), 10)
+                .Add(new AmmoAmount(10, Constants.Shotgun), 10)
+                .Add(new AmmoAmount(0, ""), 40);
+            var lootTable4 = new LootTable()
+                .Add(new AmmoAmount(20, Constants.AK47), 10)
+                .Add(new AmmoAmount(15, Constants.Shotgun), 10)
+                .Add(new AmmoAmount(10, Constants.Barrel), 5)
+                .Add(new AmmoAmount(10, Constants.Box), 5)
+                .Add(new AmmoAmount(0, ""), 40);
+            var lootTable5 = new LootTable()
+                .Add(new AmmoAmount(30, Constants.AK47), 10)
+                .Add(new AmmoAmount(25, Constants.Shotgun), 10)
+                .Add(new AmmoAmount(15, Constants.Barrel), 10)
+                .Add(new AmmoAmount(15, Constants.Box), 10)
+                .Add(new AmmoAmount(0, ""), 40);
 
+            var lootTable6 = new LootTable()
+                .Add(new AmmoAmount(40, Constants.AK47), 10)
+                .Add(new AmmoAmount(35, Constants.Shotgun), 10)
+                .Add(new AmmoAmount(20, Constants.Barrel), 10)
+                .Add(new AmmoAmount(20, Constants.Box), 10)
+                .Add(new AmmoAmount(2, Constants.RPG), 5)
+                .Add(new AmmoAmount(0, ""), 40);
+
+
+            var specialLootTable = new LootTable()
+                .Add(new AmmoAmount(10, Constants.RPG), 1);
 
             _waves = new List<List<WaveDescription>>()
             {
                 new()
                 {
-                    new WaveDescription(5, EnemyOne, lootTable1)
+                    new WaveDescription(10, MeleeEnemy, lootTable1)
                 },
                 new()
                 {
-                    new WaveDescription(10, EnemyOne, lootTable1)
+                    new WaveDescription(15, MeleeEnemy, lootTable2)
                 },
                 new()
                 {
-                    new WaveDescription(15, EnemyOne, lootTable1)
+                    new WaveDescription(15, MeleeEnemy, lootTable3)
                 },
                 new()
                 {
-                    new WaveDescription(20, EnemyOne, lootTable1)
+                    new WaveDescription(25, MeleeEnemy, lootTable4)
                 },
                 new()
                 {
-                    new WaveDescription(25, EnemyOne, lootTable1)
+                    new WaveDescription(15, MeleeEnemy, lootTable5),
+                    new WaveDescription(1, RangeEnemy, specialLootTable)
                 },
                 new()
                 {
-                    new WaveDescription(30, EnemyOne, lootTable1)
+                    new WaveDescription(20, MeleeEnemy, lootTable6),
+                    new WaveDescription(2, RangeEnemy, specialLootTable)
                 }
             };
         }

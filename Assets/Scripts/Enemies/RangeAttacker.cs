@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using DefaultNamespace;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -44,6 +45,11 @@ public class RangeAttacker : MonoBehaviour, IAttacker
     private bool hasBoulderInHand = false;
     private GameObject boulder;
 
+
+    private void OnDestroy()
+    {
+        Destroy(boulder);
+    }
 
     private void Update()
     {

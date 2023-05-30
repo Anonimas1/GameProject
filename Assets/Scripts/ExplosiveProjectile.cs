@@ -12,6 +12,9 @@ public class ExplosiveProjectile : MonoBehaviour
     [SerializeField]
     private float timeUntilDestroy = 2f;
 
+    [SerializeField]
+    private GameObject audioSourceGameObject;
+
     private void OnDrawGizmosSelected()
     {
         var transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.10f);
@@ -49,6 +52,7 @@ public class ExplosiveProjectile : MonoBehaviour
 
     private void Explode()
     {
+        Instantiate(audioSourceGameObject, transform.position, Quaternion.identity);
         var hits = Physics.OverlapSphere(transform.position, explosionRadius);
         foreach (var hit in hits)
         {

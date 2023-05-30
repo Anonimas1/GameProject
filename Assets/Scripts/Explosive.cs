@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Damageable))]
@@ -7,6 +6,9 @@ public class Explosive : MonoBehaviour
     public float explosionRadius;
     public int damage;
     private Damageable _damageable;
+
+    [SerializeField]
+    private GameObject AudioSourceObject;
 
     private void OnDrawGizmosSelected()
     {
@@ -30,6 +32,7 @@ public class Explosive : MonoBehaviour
 
     private void Explode()
     {
+        Instantiate(AudioSourceObject, transform.position, Quaternion.identity);
         var hits = Physics.OverlapSphere(transform.position, explosionRadius);
         foreach (var hit in hits)
         {
