@@ -20,6 +20,7 @@ namespace StarterAssets
 
         public UnityEvent OnNextWeapon;
         public UnityEvent OnPrevWeapon;
+        public UnityEvent OnRepair;
         
 
         [Header("Calculated values")]
@@ -39,6 +40,7 @@ namespace StarterAssets
             actionMap.FindAction("Pause").performed += (_) => OnPause.Invoke();
             actionMap.FindAction("NextWeapon").performed += (_) => OnNextWeapon.Invoke();
             actionMap.FindAction("PrevWeapon").performed += (_) => OnPrevWeapon.Invoke();
+            actionMap.FindAction("Repair").performed += (_) => OnRepair.Invoke();
         }
 
         private void Update()

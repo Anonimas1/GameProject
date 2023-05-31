@@ -31,6 +31,10 @@ public class HealthBarScript : MonoBehaviour
 
     private void Update()
     {
+        if (gameObject.activeSelf)
+        {
+            slider.value = damageable.CurrentHealth;
+        }
         StartCoroutine(PointAtCamera());
     }
 

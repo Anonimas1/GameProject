@@ -135,7 +135,14 @@ public class EnemyController : MonoBehaviour
                 }
                 break;
             case State.MovingToClosestPosition:
-                _agent.SetDestination(_calculatedPath.corners.Last());
+                if (_calculatedPath.corners.Any())
+                {
+                    _agent.SetDestination(_calculatedPath.corners.Last());   
+                }
+                else
+                {
+                    _agent.SetDestination(transform.position);
+                }
                 if (_agent.remainingDistance < meleeAttacker.Range)
                 {
                     var colliders = Physics.OverlapSphere(transform.position, meleeAttacker.Range, damageableMask);

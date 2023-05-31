@@ -106,8 +106,9 @@ MonoBehaviour:
   CurrentHealth: 100
   DestroyOnHealthZero: 1
   ScoreTracker: {fileID: 0}
-  dropItemOnDeath: 0
-  ammoPickup: {fileID: 0}
+  dropItemOnDeath: 1
+  ammoPickup: {fileID: 8986902767674089618, guid: a0f351753f75964469dc75a23690f793,
+    type: 3}
   damageTakenAudio: {fileID: 0}
 --- !u!136 &4592345041266105968
 CapsuleCollider:

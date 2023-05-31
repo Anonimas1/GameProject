@@ -19,6 +19,12 @@ namespace DefaultNamespace
 
         private StarterAssetsInputs inputs;
 
+        [SerializeField]
+        private GameObject AmmoPickupTextPrefab;
+
+        [SerializeField]
+        private Transform Possition;
+
         private void Start()
         {
             inputs = GetComponent<StarterAssetsInputs>();
@@ -79,6 +85,31 @@ namespace DefaultNamespace
 
         public void AddAmmo(string weaponName, int amount)
         {
+            var obj = Instantiate(AmmoPickupTextPrefab, Possition.position, Quaternion.identity);
+            var txt = "";
+            switch (weaponName)
+            {
+                case Constants.Barrel:
+                    txt = $"Barrel +{amount}";
+                    break;
+                case Constants.Shotgun:
+                    txt = $"Shotgun +{amount}";
+                    break;
+                case Constants.Box:
+                    txt = $"Baricade +{amount}";
+                    break;
+                case Constants.AK47:
+                    txt = $"Assault rifle +{amount}";
+                    break;
+                case Constants.RPG:
+                    txt = $"Rocket launcher +{amount}";
+                    break;
+                default:
+                    txt = "";
+                    break;
+            }
+
+            obj.GetComponent<AmmoPickupScript>().Text.text = txt;
             var weapon = _weapons.First(x => x.WeaponName == weaponName);
             weapon.RefillAmmo(amount);
         }
